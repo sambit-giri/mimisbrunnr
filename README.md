@@ -1,7 +1,7 @@
 <div align="center">
 <img src="docs/logo.png" alt="Mímisbrunnr Logo" width="160" />
 
-# Mimir's Well: The Intuition Lab
+# Mímisbrunnr: The Intuition Lab
 **Building a "gut feeling" for abstract math and physics concepts through code.**
 
 > "What I cannot create, I do not understand." — Richard Feynman
@@ -26,17 +26,17 @@ The goal is to move from "following the rules" to "internalizing the behavior" o
 
 Many of the experiments in this repository have an accompanying **interactive visualisation** hosted at:
 
-### **[sambit-giri.github.io/mimirs-well](https://sambit-giri.github.io/mimirs-well/)**
+### **[sambit-giri.github.io/mimisbrunnr](https://sambit-giri.github.io/mimisbrunnr/)**
 
 These are browser-based apps that let you explore algorithms and simulations without running any code locally.
 
 | ID | Visualisation | Key Concepts | Status |
 | :--- | :--- | :--- | :--- |
-| **01** | [**The Great Sort Race**](https://sambit-giri.github.io/mimirs-well/sorting.html) | `Algorithms` `Showdown` | ✅ Live |
-| **02** | [**Cluster Finding**](https://sambit-giri.github.io/mimirs-well/clustering.html) | `Machine Learning` `Data Science` | ✅ Live |
-| **03** | [**MCMC Sampling**](https://sambit-giri.github.io/mimirs-well/MCMCsamplers.html) | `Statistics` `Bayesian Inference` | ✅ Live |
-| **04** | [**The Occam's Razor Machine**](https://sambit-giri.github.io/mimirs-well/model-comparison.html) | `Statistics` `Model Selection` `Bayesian` | ✅ Live |
-| **05** | [**How an Interferometer Sees**](https://sambit-giri.github.io/mimirs-well/interferometer.html) | `Radio Astronomy` `Fourier Optics` `Interferometry` | ✅ Live |
+| **01** | [**The Great Sort Race**](https://sambit-giri.github.io/mimisbrunnr/sorting.html) | `Algorithms` `Showdown` | ✅ Live |
+| **02** | [**Cluster Finding**](https://sambit-giri.github.io/mimisbrunnr/clustering.html) | `Machine Learning` `Data Science` | ✅ Live |
+| **03** | [**MCMC Sampling**](https://sambit-giri.github.io/mimisbrunnr/MCMCsamplers.html) | `Statistics` `Bayesian Inference` | ✅ Live |
+| **04** | [**The Occam's Razor Machine**](https://sambit-giri.github.io/mimisbrunnr/model-comparison.html) | `Statistics` `Model Selection` `Bayesian` | ✅ Live |
+| **05** | [**How an Interferometer Sees**](https://sambit-giri.github.io/mimisbrunnr/interferometer.html) | `Radio Astronomy` `Fourier Optics` `Interferometry` | ✅ Live |
 
 The source code for these lives in the `docs/` folder of this repository.
 
@@ -53,7 +53,7 @@ The source code for these lives in the `docs/` folder of this repository.
 
 ## 📂 Repository Structure
 ```
-mimirs-well/
+mimisbrunnr/
 ├── notebooks/          # Jupyter notebooks — one folder per experiment
 │   ├── 01-monty-hall/
 │   ├── 02-random-walks/
@@ -70,8 +70,8 @@ Each notebook experiment is self-contained inside the [`notebooks/`](./notebooks
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/sambit-giri/mimirs-well.git
-cd mimirs-well
+git clone https://github.com/sambit-giri/mimisbrunnr.git
+cd mimisbrunnr
 ```
 
 ### 2. Set up the environment (Recommended)
@@ -102,7 +102,7 @@ jupyter notebook
 
 ## 📜 License
 
-This project is licensed under the [MIT License](https://github.com/sambit-giri/mimirs-well?tab=MIT-1-ov-file). You are free to use, modify, and distribute this software, provided that you include the original copyright and license notice.
+This project is licensed under the [MIT License](https://github.com/sambit-giri/mimisbrunnr?tab=MIT-1-ov-file). You are free to use, modify, and distribute this software, provided that you include the original copyright and license notice.
 
 ---
 
