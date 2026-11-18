@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How the Universe Stretches | Mímisbrunnr</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body { background-color: #ffffff; color: #222222; }
+        .font-sans { font-family: 'Inter', -apple-system, sans-serif; }
+        .font-serif { font-family: 'Lora', Georgia, serif; }
+
+        .pwrap {
+            aspect-ratio: 4 / 3;
+            background: #ffffff;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            position: relative;
+        }
+        .viz-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+
+        .seg { display: inline-flex; border: 1px solid #cbd5e1; border-radius: 0.375rem; overflow: hidden; }
+        .seg button {
+            font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+            padding: 3px 9px; color: #475569; background: #fff; transition: background 0.15s;
+        }
+        .seg button + button { border-left: 1px solid #cbd5e1; }
+        .seg button:hover { background: #f1f5f9; }
+        .seg button.active { background: #2563eb; color: #fff; }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1em;
+        }
+        input[type=number] { -moz-appearance: textfield; }
+        .num {
+            font-family: 'Inter', sans-serif; font-size: 13px; width: 5.5rem;
+            border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 4px 6px; outline: none;
+        }
+        .num:focus { border-color: #3b82f6; }
+        .try-btn {
+            font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+            border: 1px solid #bfdbfe; color: #1d4ed8; background: #eff6ff;
+            border-radius: 0.375rem; padding: 3px 9px; transition: background 0.15s;
+        }
+        .try-btn:hover { background: #dbeafe; }
+        .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 9999px; margin-right: 4px; vertical-align: middle; }
+        .legend-line { display: inline-block; width: 14px; height: 0; border-top: 2px solid; margin-right: 4px; vertical-align: middle; }
+        .chip { font-family: 'Inter', sans-serif; }
+        .chip .k { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
+        .chip .v { font-size: 15px; font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; }
+        .rd .k { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; }
+        .rd .v { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; }
+        .rd .s { font-family: 'Lora', serif; font-size: 12px; color: #64748b; line-height: 1.3; }
+        input[type=range]:disabled { opacity: 0.45; }
+    </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-blue-100 selection:text-blue-900 flex flex-col items-center py-8 md:py-10 px-4 md:px-8">
+
+<div class="w-full max-w-6xl flex-grow flex flex-col">
+
+    <!-- Header -->
+    <header class="mb-6 flex flex-col items-start">
+        <div class="flex items-center gap-3 mb-3">
+            <a href="index.html" class="group shrink-0 block" title="Back to Hub">
+                <img src="logo.png" alt="Mímisbrunnr Logo" class="w-10 h-10 rounded-lg object-cover border border-slate-200 grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300">
+            </a>
+            <h1 class="font-serif text-3xl md:text-4xl font-medium text-slate-900">How the Universe Stretches</h1>
+        </div>
+        <div class="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Cosmology &bull; General Relativity &bull; Distances &amp; Horizons</div>
+        <p class="font-serif text-sm md:text-base text-slate-600 leading-snug">Space itself expands, and almost everything strange about cosmology follows from one number changing with time: the <em>scale factor</em> a(t), the size of the Universe relative to today. Its history is fixed by what the Universe contains. Change the contents below and watch the history, the meaning of &ldquo;distance&rdquo;, and the edges of what we can ever see all change with it. Click any panel to pick a moment in the past; the readout underneath works as a full cosmology calculator.</p>
+    </header>
+
+    <hr class="border-slate-100 mb-6">
+
+    <!-- Controls -->
+    <div class="flex flex-col gap-5 mb-5">
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-5 items-start">
+            <div class="flex flex-col gap-1.5">
+                <label for="preset" class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest">1. Universe</label>
+                <select id="preset" class="font-sans bg-white border border-slate-300 text-slate-800 text-sm rounded-md block w-full p-2 cursor-pointer hover:bg-slate-50 outline-none"></select>
+                <p class="font-serif text-xs text-slate-500 mt-0.5" id="preset-note"></p>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest flex justify-between">
+                    <span>2. Hubble constant H<sub>0</sub></span>
+                    <span id="lab-H0" class="text-blue-600 font-bold"></span>
+                </label>
+                <input type="range" id="sl-H0" min="40" max="100" step="0.1" class="w-full accent-blue-600">
+                <p class="font-serif text-xs text-slate-500 mt-0.5">Today&rsquo;s expansion rate, km/s/Mpc. Sets every scale: 1/H<sub>0</sub> &asymp; <span id="note-H0"></span>.</p>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest flex justify-between">
+                    <span>3. Matter &Omega;<sub>m</sub></span>
+                    <span id="lab-Om" class="text-blue-600 font-bold"></span>
+                </label>
+                <input type="range" id="sl-Om" min="0" max="3" step="0.005" class="w-full accent-blue-600">
+                <p class="font-serif text-xs text-slate-500 mt-0.5">Dark + ordinary matter. Its gravity <em>brakes</em> the expansion.</p>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest flex justify-between">
+                    <span>4. Dark energy &Omega;<sub>&Lambda;</sub></span>
+                    <span id="lab-OL" class="text-blue-600 font-bold"></span>
+                </label>
+                <input type="range" id="sl-OL" min="-1" max="3" step="0.005" class="w-full accent-blue-600">
+                <label class="font-sans text-xs text-slate-600 flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" id="cb-flat" class="accent-blue-600"> Force flat (&Omega;<sub>&Lambda;</sub> = 1 &minus; &Omega;<sub>m</sub> &minus; &Omega;<sub>r</sub>)
+                </label>
+            </div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-md border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="flex flex-col gap-1.5">
+                <label class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest flex justify-between">
+                    <span>5. Dark-energy equation of state w</span>
+                    <span id="lab-w" class="text-blue-600 font-bold"></span>
+                </label>
+                <input type="range" id="sl-w" min="-2" max="0" step="0.01" class="w-full accent-blue-600">
+                <p class="font-serif text-xs text-slate-500 mt-0.5">Pressure / density. w = &minus;1 is a cosmological constant; w &lt; &minus;1 is &ldquo;phantom&rdquo;; w &gt; &minus;1/3 no longer accelerates.</p>
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <span class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest">6. Radiation &Omega;<sub>r</sub></span>
+                <label class="font-sans text-xs text-slate-600 flex items-center gap-1.5 cursor-pointer select-none">
+                    <input type="checkbox" id="cb-rad" class="accent-blue-600"> Include photons + neutrinos
+                </label>
+                <p class="font-serif text-xs text-slate-500 mt-0.5" id="note-rad"></p>
+            </div>
+            <div class="flex flex-col gap-1">
+                <span class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest">Curvature &Omega;<sub>k</sub> = 1 &minus; &Sigma;&Omega;</span>
+                <span id="val-Ok" class="font-sans text-lg font-semibold text-slate-900 tabular-nums"></span>
+                <p class="font-serif text-xs text-slate-500" id="note-Ok"></p>
+            </div>
+            <div class="flex flex-col gap-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest">Distance units</span>
+                    <div class="seg" id="unit-seg"><button data-v="Gpc" class="active">Gpc</button><button data-v="Gly">Gly</button></div>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <span class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest">Compare with</span>
+                    <label class="font-sans text-xs text-slate-600 flex items-center gap-1.5 cursor-pointer select-none">
+                        <input type="checkbox" id="cb-ref" class="accent-blue-600" checked> Planck ΛCDM <span class="legend-line" style="border-color:#94a3b8;border-top-style:dashed"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary chips -->
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-5 border-y border-slate-100 py-3" id="chips"></div>
+
+    <!-- Redshift picker -->
+    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-4">
+        <span class="font-sans text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0">Look back to redshift z</span>
+        <input type="range" id="sl-z" min="0" max="1" step="0.0005" class="flex-1 accent-slate-900">
+        <div class="flex items-center gap-2">
+            <input type="number" id="num-z" class="num" min="0" step="any">
+            <div class="flex flex-wrap gap-1.5">
+                <button class="try-btn" data-z="0.1">0.1</button>
+                <button class="try-btn" data-z="1">1</button>
+                <button class="try-btn" data-z="1.6">1.6</button>
+                <button class="try-btn" data-z="6">6</button>
+                <button class="try-btn" data-z="1090">CMB</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panels -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-6 mb-5" id="panels">
+
+        <figure class="flex flex-col gap-1.5">
+            <figcaption class="flex justify-between items-center gap-2 min-h-[24px]">
+                <span class="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-500">① Expansion history a(t)</span>
+            </figcaption>
+            <div class="pwrap"><canvas id="cv-a" class="viz-canvas"></canvas></div>
+            <p class="font-serif text-xs text-slate-500 leading-snug">
+                <span class="legend-line" style="border-color:#2563eb"></span>slowing down
+                <span class="legend-line ml-2" style="border-color:#7c3aed"></span>speeding up.
+                The slope is the expansion rate; the bend is gravity versus dark energy. Today a = 1.
+            </p>
+        </figure>
+
+        <figure class="flex flex-col gap-1.5">
+            <figcaption class="flex justify-between items-center gap-2 min-h-[24px]">
+                <span class="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-500">② Who is in charge? Ω<sub>i</sub>(a)</span>
+            </figcaption>
+            <div class="pwrap"><canvas id="cv-om" class="viz-canvas"></canvas></div>
+            <p class="font-serif text-xs text-slate-500 leading-snug">
+                <span class="legend-line" style="border-color:#d97706"></span>radiation
+                <span class="legend-line ml-2" style="border-color:#2563eb"></span>matter
+                <span class="legend-line ml-2" style="border-color:#7c3aed"></span>dark energy
+                <span class="legend-line ml-2" style="border-color:#64748b"></span>curvature.
+                Share of the expansion budget at each size. Each component dilutes at its own rate (a<sup>&minus;4</sup>, a<sup>&minus;3</sup>, a<sup>&minus;3(1+w)</sup>, a<sup>&minus;2</sup>), so each takes its turn.
+            </p>
+        </figure>
+
+        <figure class="flex flex-col gap-1.5">
+            <figcaption class="flex justify-between items-center gap-2 min-h-[24px]">
+                <span class="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-500">③ The distance zoo</span>
+                <div class="seg" id="zr-seg"><button data-v="3">z ≤ 3</button><button data-v="10" class="active">z ≤ 10</button><button data-v="log">log z</button></div>
+            </figcaption>
+            <div class="pwrap"><canvas id="cv-d" class="viz-canvas"></canvas></div>
+            <p class="font-serif text-xs text-slate-500 leading-snug">
+                <span class="legend-line" style="border-color:#2563eb"></span>comoving (= proper, today)
+                <span class="legend-line ml-2" style="border-color:#e11d48"></span>luminosity
+                <span class="legend-line ml-2" style="border-color:#059669"></span>angular diameter
+                <span class="legend-line ml-2" style="border-color:#d97706"></span>light travel
+                <span class="legend-line ml-2" style="border-color:#94a3b8;border-top-style:dotted"></span>Hubble&rsquo;s law cz/H<sub>0</sub>.
+                One object, four honest answers to &ldquo;how far?&rdquo;
+            </p>
+        </figure>
+
+        <figure class="flex flex-col gap-1.5">
+            <figcaption class="flex justify-between items-center gap-2 min-h-[24px]">
+                <span class="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-500">④ Spacetime diagram</span>
+                <div class="seg" id="st-seg"><button data-v="proper" class="active">Proper</button><button data-v="comoving">Comoving</button></div>
+            </figcaption>
+            <div class="pwrap"><canvas id="cv-st" class="viz-canvas"></canvas></div>
+            <p class="font-serif text-xs text-slate-500 leading-snug">
+                <span class="legend-dot" style="background:#fcd34d"></span>our past light cone
+                <span class="legend-line ml-2" style="border-color:#2563eb;border-top-style:dashed"></span>Hubble sphere
+                <span class="legend-line ml-2" style="border-color:#059669"></span>particle horizon
+                <span class="legend-line ml-2" style="border-color:#7c3aed"></span>event horizon
+                <span class="legend-line ml-2" style="border-color:#cbd5e1"></span>galaxies.
+                We sit at the centre; time runs upward.
+            </p>
+        </figure>
+    </div>
+
+    <!-- Calculator readout -->
+    <section class="mb-5 bg-slate-50 rounded-md border border-slate-200 p-4 md:p-5">
+        <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+            <h2 class="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-400">Calculator: an object at <span id="rd-title" class="text-slate-700"></span></h2>
+            <span class="font-serif text-xs text-slate-500" id="rd-sub"></span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-4" id="readout"></div>
+    </section>
+
+    <!-- Insights -->
+    <div id="insights-panel" class="font-serif text-sm text-slate-700 leading-relaxed border-l-2 border-blue-200 pl-3 py-1 mb-6 flex flex-col gap-1.5 min-h-[3rem]"></div>
+
+    <!-- Experiments -->
+    <section class="mb-6">
+        <h2 class="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Guided Experiments</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="experiments"></div>
+    </section>
+
+    <!-- Background -->
+    <section class="mb-6 bg-slate-50 rounded-md border border-slate-200 p-4 md:p-5">
+        <h2 class="font-sans text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Background: One Equation, Many Distances</h2>
+        <div class="flex flex-col gap-5">
+
+            <div>
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-1">
+                    <span class="font-sans text-sm font-bold text-blue-700">The Friedmann Equation</span>
+                    <span class="font-sans text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Contents decide history</span>
+                </div>
+                <p class="font-serif text-sm text-slate-600 leading-snug mb-1.5">
+                    For a uniform universe, Einstein&rsquo;s equations reduce to one equation for the expansion rate H = &#7539;/a. Every ingredient contributes according to how fast it thins out as space grows:
+                </p>
+                <p class="font-sans text-sm font-medium text-slate-800 bg-white border border-slate-200 rounded px-3 py-1.5 inline-block tracking-wide">
+                    H&sup2;(a) / H<sub>0</sub>&sup2; &nbsp;=&nbsp; &Omega;<sub>r</sub>a<sup>&minus;4</sup> + &Omega;<sub>m</sub>a<sup>&minus;3</sup> + &Omega;<sub>k</sub>a<sup>&minus;2</sup> + &Omega;<sub>&Lambda;</sub>a<sup>&minus;3(1+w)</sup>
+                </p>
+                <p class="font-serif text-xs text-slate-500 leading-snug mt-2">
+                    Matter is diluted by volume (a<sup>&minus;3</sup>). Radiation also loses energy to redshift (a<sup>&minus;4</sup>). A cosmological constant (w = &minus;1) does not dilute at all. The acceleration equation, &auml;/a = &minus;&frac12;H<sub>0</sub>&sup2; &Sigma; &Omega;<sub>i</sub>(1+3w<sub>i</sub>)a<sup>&minus;3(1+w<sub>i</sub>)</sup>, says that anything with w &lt; &minus;1/3 pushes instead of pulls. This page integrates that equation forwards and backwards from today, so bounces, turnarounds and crunches come out by themselves.
+                </p>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-1">
+                    <span class="font-sans text-sm font-bold text-blue-700">Redshift Is Stretching</span>
+                    <span class="font-sans text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Not a Doppler shift</span>
+                </div>
+                <p class="font-serif text-sm text-slate-600 leading-snug mb-1.5">
+                    Light&rsquo;s wavelength grows in step with space while it travels, so redshift measures how much the Universe has grown since the light left:
+                </p>
+                <p class="font-sans text-sm font-medium text-slate-800 bg-white border border-slate-200 rounded px-3 py-1.5 inline-block tracking-wide">
+                    1 + z &nbsp;=&nbsp; a(t<sub>0</sub>) / a(t<sub>emit</sub>) &nbsp;=&nbsp; 1 / a<sub>emit</sub>
+                </p>
+                <p class="font-serif text-xs text-slate-500 leading-snug mt-2">
+                    Light from z = 1 left when the Universe was half its present size. The CMB, at z &asymp; 1090, left when it was about a thousandth.
+                </p>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-1">
+                    <span class="font-sans text-sm font-bold text-blue-700">Four Distances</span>
+                    <span class="font-sans text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Each answers a different question</span>
+                </div>
+                <p class="font-serif text-sm text-slate-600 leading-snug mb-1.5">
+                    In an expanding universe &ldquo;distance&rdquo; needs a <em>when</em> and a <em>how measured</em>. With the comoving distance &chi; = c&int;dt/a = c&int;dz/H:
+                </p>
+                <p class="font-sans text-sm font-medium text-slate-800 bg-white border border-slate-200 rounded px-3 py-1.5 inline-block tracking-wide">
+                    D<sub>M</sub> = S<sub>k</sub>(&chi;), &nbsp; D<sub>A</sub> = D<sub>M</sub>/(1+z), &nbsp; D<sub>L</sub> = D<sub>M</sub>(1+z), &nbsp; D<sub>lt</sub> = c(t<sub>0</sub> &minus; t<sub>emit</sub>)
+                </p>
+                <p class="font-serif text-xs text-slate-500 leading-snug mt-2">
+                    <strong>Comoving</strong>: where the object is <em>now</em>, measured with rulers frozen at today&rsquo;s size. <strong>Angular diameter</strong>: what you would infer from apparent size, because the light left when the object was much closer to us. <strong>Luminosity</strong>: what you would infer from brightness. Photons are both redshifted and spread out in time, so faint objects look extra far. <strong>Light travel</strong>: c times how long the light was in flight. S<sub>k</sub> is sinh for an open universe and sin for a closed one, so in a closed universe D<sub>A</sub> can fall to zero at the antipode.
+                </p>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-1">
+                    <span class="font-sans text-sm font-bold text-blue-700">Horizons</span>
+                    <span class="font-sans text-[10px] font-semibold text-slate-400 uppercase tracking-widest">The edges of seeing</span>
+                </div>
+                <p class="font-serif text-sm text-slate-600 leading-snug">
+                    The <strong>Hubble sphere</strong> (radius c/H) is where recession speed equals c. It is <em>not</em> a horizon: light emitted just outside it is first carried away, but if the sphere grows it can catch the light. The <strong>particle horizon</strong> bounds everything whose light has had time to reach us since the Big Bang. That is the observable universe. The <strong>event horizon</strong>, which exists only if the expansion accelerates forever (or ends in a crunch), bounds the events whose light will <em>ever</em> reach us. Galaxies keep fixed comoving coordinates. In proper coordinates they fan outward. The past light cone is a teardrop: early light was emitted close to us and then carried away by the expansion before it could make progress.
+                </p>
+            </div>
+
+            <hr class="border-slate-200">
+
+            <div>
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-1">
+                    <span class="font-sans text-sm font-bold text-blue-700">What this page leaves out</span>
+                </div>
+                <p class="font-serif text-xs text-slate-500 leading-snug">
+                    The Universe here is perfectly smooth. There are no galaxies forming, no peculiar velocities, no gravitational lensing. Neutrinos are treated as massless radiation (&Omega;<sub>r</sub>h&sup2; = 4.18&times;10<sup>&minus;5</sup>, photons plus N<sub>eff</sub> = 3.046), dark energy has a constant w, and inflation is not modelled, so the &ldquo;Big Bang&rdquo; is simply where a &rarr; 0. The history is computed with a 4th-order Runge&ndash;Kutta integration of the acceleration equation in steps of &Delta;ln a &asymp; 0.0025, matched to analytic power laws at the singular ends. Results agree with standard calculators (e.g. astropy) to better than 0.1% for &Lambda;CDM.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-auto pt-4 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-3">
+        <div class="font-sans text-[10px] font-medium text-slate-400 tracking-wide uppercase flex items-center gap-1.5">
+            <span>Built with ☕ by <a href="https://github.com/sambit-giri" target="_blank" class="text-slate-500 hover:text-slate-900 transition-colors">Sambit Giri</a></span>
+            <span>&bull;</span>
+            <span>MIT License</span>
+        </div>
+        <a href="index.html" class="font-sans text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors">&larr; Back to Hub</a>
+    </footer>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONSTANTS & UTILITIES
+// ─────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const C_KMS = 299792.458;
+const GLY_PER_GPC = 3.26156;
+const tGyr = H0 => 977.792 / H0;          // 1/H0 in Gyr
+const dGpc = H0 => 299.792458 / H0;       // c/H0 in Gpc
+const omegaR = H0 => 4.18e-5 / Math.pow(H0 / 100, 2);
+
+const COL = {
+    blue: '#2563eb', purple: '#7c3aed', amber: '#d97706', green: '#059669',
+    rose: '#e11d48', slate: '#64748b', ink: '#0f172a', grid: '#f1f5f9',
+    box: '#cbd5e1', ref: '#94a3b8', lc: '#fcd34d'
+};
+
+function fmt(x, sig = 3) {
+    if (x === null || x === undefined || !isFinite(x)) return '∞';
+    const a = Math.abs(x);
+    if (a === 0) return '0';
+    if (a >= 1e5 || a < 1e-3) return x.toExponential(sig - 1).replace('e+', 'e');
+    return (+x.toPrecision(sig)).toLocaleString('en-US', { maximumFractionDigits: 6 });
+}
+
+// ─────────────────────────────────────────────
+// COSMOLOGY SOLVER
+// Units: time in 1/H0, distance in c/H0. Today: t-origin set later, a = 1, da/dt = 1.
+// ─────────────────────────────────────────────
+function solve(p) {
+    const Or = p.rad ? omegaR(p.H0) : 0;
+    const Om = p.Om, w = p.w;
+    const OL = p.flat ? 1 - Om - Or : p.OL;
+    const Ok = p.flat ? 0 : 1 - Or - Om - OL;
+    const deExp = -3 * (1 + w);
+    const E2 = a => Or / (a * a * a * a) + Om / (a * a * a) + Ok / (a * a) + OL * Math.pow(a, deExp);
+    const acc = a => -0.5 * a * (2 * Or / (a * a * a * a) + Om / (a * a * a) + (1 + 3 * w) * OL * Math.pow(a, deExp));
+
+    const deriv = y => [y[1], acc(y[0]), 1 / y[0]];
+    function rk4(y, h) {
+        const k1 = deriv(y);
+        const y2 = [y[0] + 0.5 * h * k1[0], y[1] + 0.5 * h * k1[1], y[2] + 0.5 * h * k1[2]];
+        if (!(y2[0] > 0)) return null;
+        const k2 = deriv(y2);
+        const y3 = [y[0] + 0.5 * h * k2[0], y[1] + 0.5 * h * k2[1], y[2] + 0.5 * h * k2[2]];
+        if (!(y3[0] > 0)) return null;
+        const k3 = deriv(y3);
+        const y4 = [y[0] + h * k3[0], y[1] + h * k3[1], y[2] + h * k3[2]];
+        if (!(y4[0] > 0)) return null;
+        const k4 = deriv(y4);
+        return [0, 1, 2].map(i => y[i] + h / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+    }
+    const TLIM = 40;
+    function run(dir) {
+        let y = [1, 1, 0], t = 0;
+        const T = [0], A = [1], AD = [1], N = [0];
+        let end = 'time';
+        for (let i = 0; i < 100000; i++) {
+            const a = y[0], ad = y[1], add = acc(a);
+            let h = 0.0025 * Math.min(a / Math.max(Math.abs(ad), 1e-30), Math.sqrt(a / Math.max(Math.abs(add), 1e-30)));
+            h = Math.min(h, 0.01);
+            const yn = rk4(y, dir * h);
+            if (!yn || !(yn[0] > 0) || !isFinite(yn[1])) { end = 'singular'; break; }
+            y = yn; t += dir * h;
+            T.push(t); A.push(y[0]); AD.push(y[1]); N.push(y[2]);
+            if (y[0] < 1e-5) { end = 'singular'; break; }
+            if (y[0] > 1e4) { end = 'huge'; break; }
+            if (Math.abs(t) > TLIM) { end = 'time'; break; }
+        }
+        return { T, A, AD, N, end };
+    }
+
+    const B = run(-1), F = run(+1);
+    const t = [], a = [], ad = [], eta = [];
+    for (let i = B.T.length - 1; i >= 1; i--) { t.push(B.T[i]); a.push(B.A[i]); ad.push(B.AD[i]); eta.push(B.N[i]); }
+    const iT = t.length;
+    for (let i = 0; i < F.T.length; i++) { t.push(F.T[i]); a.push(F.A[i]); ad.push(F.AD[i]); eta.push(F.N[i]); }
+    const last = t.length - 1;
+
+    // ── Beginning ──
+    let hasBang = false, finitePH = false, tShift = 0, etaShift = 0;
+    if (B.end === 'singular') {
+        const a0 = a[0], ad0 = Math.abs(ad[0]);
+        const q = a0 * acc(a0) / (ad0 * ad0);        // = (p-1)/p for a ∝ t^p
+        if (q < 0.98) {
+            const pw = 1 / (1 - q);
+            const dtB = pw * a0 / ad0;
+            hasBang = true;
+            tShift = -(t[0] - dtB);
+            if (pw < 0.98) { finitePH = true; etaShift = -(eta[0] - dtB / (a0 * (1 - pw))); }
+        }
+    }
+    for (let i = 0; i <= last; i++) { t[i] += tShift; if (finitePH) eta[i] += etaShift; }
+    const t0 = t[iT], eta0 = eta[iT];
+
+    // ── Past monotonic segment (bounce detection) ──
+    let iStart = iT;
+    while (iStart > 0 && ad[iStart - 1] > 0) iStart--;
+    const bounce = (!hasBang && iStart > 0) ? { i: iStart, a: a[iStart], t: t[iStart] } : null;
+
+    // ── Fate ──
+    let fate = 'coast', tEnd = null, etaEnd = null, turn = null;
+    for (let i = iT; i < last; i++) if (ad[i] > 0 && ad[i + 1] <= 0) { turn = { i, a: a[i], t: t[i] }; break; }
+    {
+        const aL = a[last], adL = ad[last];
+        if (F.end === 'singular' && adL < 0) {
+            const q = aL * acc(aL) / (adL * adL);
+            const pw = 1 / (1 - q);
+            const tau = pw * aL / Math.abs(adL);
+            fate = 'crunch'; tEnd = t[last] + tau;
+            etaEnd = pw < 0.98 ? eta[last] + tau / (aL * (1 - pw)) : Infinity;
+        } else if (adL > 0) {
+            const qd = -aL * acc(aL) / (adL * adL);
+            if (qd < -0.02) {
+                etaEnd = eta[last] + 1 / (adL * (-qd));
+                const s = 1 + qd;
+                if (s < -0.02) { fate = 'rip'; tEnd = t[last] + 1 / ((adL / aL) * (-s)); }
+                else fate = 'accel';
+            } else fate = 'coast';
+        } else fate = 'collapsing';
+    }
+    const hasEH = etaEnd !== null && isFinite(etaEnd);
+
+    // ── Past arrays for interpolation (a increasing) ──
+    const pa = a.slice(iStart, iT + 1), pt = t.slice(iStart, iT + 1), pe = eta.slice(iStart, iT + 1), pad = ad.slice(iStart, iT + 1);
+    const pla = pa.map(Math.log);
+    function interpA(aq) {
+        if (aq < pa[0] || aq > 1 + 1e-12) return null;
+        const la = Math.log(aq);
+        let lo = 0, hi = pa.length - 1;
+        while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (pla[mid] > la) hi = mid; else lo = mid; }
+        const f = hi === lo ? 0 : (la - pla[lo]) / (pla[hi] - pla[lo]);
+        return { t: pt[lo] + f * (pt[hi] - pt[lo]), eta: pe[lo] + f * (pe[hi] - pe[lo]), ad: pad[lo] + f * (pad[hi] - pad[lo]) };
+    }
+    function aAtT(tq) {   // in past segment, t increasing
+        if (tq < pt[0] || tq > t0) return null;
+        let lo = 0, hi = pt.length - 1;
+        while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (pt[mid] > tq) hi = mid; else lo = mid; }
+        const f = (tq - pt[lo]) / (pt[hi] - pt[lo] || 1);
+        return Math.exp(pla[lo] + f * (pla[hi] - pla[lo]));
+    }
+    const sk = Math.sqrt(Math.abs(Ok));
+    const DM = chi => Ok > 1e-7 ? Math.sinh(sk * chi) / sk : Ok < -1e-7 ? Math.sin(sk * chi) / sk : chi;
+    const zMax = 1 / pa[0] - 1;
+    function dist(z) {
+        const aq = 1 / (1 + z);
+        const r = interpA(aq);
+        if (!r) return null;
+        const chi = eta0 - r.eta, dm = DM(chi);
+        return {
+            z, a: aq, t: r.t, chi, DM: dm, DA: dm * aq, DL: dm / aq, Dlt: t0 - r.t,
+            H: Math.sqrt(Math.max(E2(aq), 0)), vNow: chi, vThen: r.ad * chi, Dthen: aq * chi
+        };
+    }
+
+    // ── Milestones ──
+    let zAcc = null;
+    if (acc(1) > 0) {
+        for (let i = pa.length - 1; i > 0; i--) {
+            if (acc(pa[i - 1]) <= 0) {
+                let lo = pa[i - 1], hi = pa[i];
+                for (let k = 0; k < 50; k++) { const m = 0.5 * (lo + hi); if (acc(m) > 0) hi = m; else lo = m; }
+                zAcc = 1 / hi - 1; break;
+            }
+        }
+    }
+    const zEq = (Or > 0 && Om > 0) ? Om / Or - 1 : null;
+    const zDE = (OL > 0 && Om > 0 && w < 0) ? Math.pow(Om / OL, 1 / (3 * w)) - 1 : null;
+
+    // D_A turnover & Hubble-sphere crossing, light-cone maximum
+    let daMax = null, zHS = null, lcMax = { d: 0, z: null };
+    {
+        let best = -Infinity, bestz = null, prevChi = 0;
+        const N = 1500, zTop = Math.min(zMax, 1e4);
+        for (let k = 1; k <= N; k++) {
+            const z = Math.expm1(k / N * Math.log1p(zTop));
+            const d = dist(z); if (!d) break;
+            if (d.DA > best) { best = d.DA; bestz = z; }
+            if (zHS === null && prevChi < 1 && d.chi >= 1) zHS = z;
+            if (d.Dthen > lcMax.d) lcMax = { d: d.Dthen, z };
+            prevChi = d.chi;
+        }
+        if (bestz !== null && bestz < zTop * 0.98) daMax = { z: bestz, d: best };
+    }
+
+    return {
+        p, Or, Om, OL, Ok, w, E2, acc, t, a, ad, eta, iT, last, t0, eta0,
+        hasBang, finitePH, bounce, fate, tEnd, etaEnd, hasEH, turn,
+        pa, pt, interpA, aAtT, dist, zMax, zAcc, zEq, zDE, daMax, zHS, lcMax,
+        q0: -acc(1), PH0: finitePH ? eta0 : Infinity, EH0: hasEH ? etaEnd - eta0 : Infinity,
+        tG: tGyr(p.H0), dG: dGpc(p.H0)
+    };
+}
+
+// ─────────────────────────────────────────────
+// PLOTTING HELPERS
+// ─────────────────────────────────────────────
+function niceStep(range, n) {
+    const raw = range / n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+    return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+}
+function linTicks(lo, hi, n = 5) {
+    const s = niceStep(hi - lo, n), out = [];
+    for (let v = Math.ceil(lo / s - 1e-9) * s; v <= hi + 1e-9 * Math.abs(s); v += s) out.push(Math.abs(v) < s * 1e-9 ? 0 : +v.toPrecision(10));
+    return out;
+}
+function logTicks(lo, hi) {
+    const out = [];
+    for (let k = Math.ceil(Math.log10(lo) - 1e-9); k <= Math.floor(Math.log10(hi) + 1e-9); k++) out.push(Math.pow(10, k));
+    return out;
+}
+const tickFmt = v => v === 0 ? '0' : (Math.abs(v) >= 1e4 || Math.abs(v) < 1e-3) ? v.toExponential(0).replace('e+', 'e') : String(+v.toPrecision(4));
+
+class Plot {
+    constructor(id) { this.cv = $(id); this.ctx = this.cv.getContext('2d'); }
+    begin(m) {
+        const r = this.cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+        this.cv.width = Math.round(r.width * d); this.cv.height = Math.round(r.height * d);
+        this.ctx.setTransform(d, 0, 0, d, 0, 0);
+        this.W = r.width; this.H = r.height;
+        this.ctx.clearRect(0, 0, this.W, this.H);
+        this.m = Object.assign({ l: 48, r: 14, t: 14, b: 36 }, m || {});
+        this.bx = this.m.l; this.by = this.m.t; this.bw = this.W - this.m.l - this.m.r; this.bh = this.H - this.m.t - this.m.b;
+    }
+    range(x0, x1, y0, y1, xlog = false, ylog = false) {
+        Object.assign(this, { x0, x1, y0, y1, xlog, ylog });
+        if (xlog) { this.lx0 = Math.log10(x0); this.lx1 = Math.log10(x1); }
+        if (ylog) { this.ly0 = Math.log10(y0); this.ly1 = Math.log10(y1); }
+    }
+    X(v) { const u = this.xlog ? (Math.log10(v) - this.lx0) / (this.lx1 - this.lx0) : (v - this.x0) / (this.x1 - this.x0); return Math.max(-1e5, Math.min(1e5, this.bx + u * this.bw)); }
+    Y(v) { const u = this.ylog ? (Math.log10(v) - this.ly0) / (this.ly1 - this.ly0) : (v - this.y0) / (this.y1 - this.y0); return Math.max(-1e5, Math.min(1e5, this.by + (1 - u) * this.bh)); }
+    invX(px) { const u = (px - this.bx) / this.bw; return this.xlog ? Math.pow(10, this.lx0 + u * (this.lx1 - this.lx0)) : this.x0 + u * (this.x1 - this.x0); }
+    invY(py) { const u = 1 - (py - this.by) / this.bh; return this.ylog ? Math.pow(10, this.ly0 + u * (this.ly1 - this.ly0)) : this.y0 + u * (this.y1 - this.y0); }
+    inside(px, py) { return px >= this.bx && px <= this.bx + this.bw && py >= this.by && py <= this.by + this.bh; }
+    clip() { const c = this.ctx; c.save(); c.beginPath(); c.rect(this.bx, this.by, this.bw, this.bh); c.clip(); }
+    unclip() { this.ctx.restore(); }
+    axes({ xlabel, ylabel, xticks, yticks, xfmt = tickFmt, yfmt = tickFmt }) {
+        const c = this.ctx;
+        c.font = '10px Inter, sans-serif'; c.fillStyle = COL.slate; c.lineWidth = 1;
+        c.strokeStyle = COL.grid;
+        xticks.forEach(v => { const x = Math.round(this.X(v)) + 0.5; c.beginPath(); c.moveTo(x, this.by); c.lineTo(x, this.by + this.bh); c.stroke(); });
+        yticks.forEach(v => { const y = Math.round(this.Y(v)) + 0.5; c.beginPath(); c.moveTo(this.bx, y); c.lineTo(this.bx + this.bw, y); c.stroke(); });
+        c.strokeStyle = COL.box; c.strokeRect(this.bx + 0.5, this.by + 0.5, this.bw - 1, this.bh - 1);
+        c.textAlign = 'center'; c.textBaseline = 'top';
+        xticks.forEach(v => c.fillText(xfmt(v), this.X(v), this.by + this.bh + 4));
+        c.textAlign = 'right'; c.textBaseline = 'middle';
+        yticks.forEach(v => c.fillText(yfmt(v), this.bx - 5, this.Y(v)));
+        c.font = '600 10px Inter, sans-serif'; c.fillStyle = '#475569';
+        c.textAlign = 'center'; c.textBaseline = 'bottom';
+        c.fillText(xlabel, this.bx + this.bw / 2, this.H - 3);
+        c.save(); c.translate(11, this.by + this.bh / 2); c.rotate(-Math.PI / 2); c.textBaseline = 'middle'; c.fillText(ylabel, 0, 0); c.restore();
+    }
+    line(xs, ys, { color = COL.ink, width = 1.6, dash = null, alpha = 1 } = {}) {
+        const c = this.ctx; c.save(); c.strokeStyle = color; c.lineWidth = width; c.globalAlpha = alpha;
+        c.setLineDash(dash || []); c.lineJoin = 'round';
+        c.beginPath(); let pen = false;
+        for (let i = 0; i < xs.length; i++) {
+            const x = xs[i], y = ys[i];
+            if (!isFinite(x) || !isFinite(y) || (this.xlog && x <= 0) || (this.ylog && y <= 0)) { pen = false; continue; }
+            const px = this.X(x), py = this.Y(y);
+            if (pen) c.lineTo(px, py); else { c.moveTo(px, py); pen = true; }
+        }
+        c.stroke(); c.restore();
+    }
+    hline(y, style) { this.line([this.x0, this.x1], [y, y], style); }
+    vline(x, style) { this.line([x, x], [this.y0, this.y1], style); }
+    dot(x, y, { color = COL.ink, r = 3.5, ring = false } = {}) {
+        if (!isFinite(x) || !isFinite(y)) return;
+        const c = this.ctx; c.beginPath(); c.arc(this.X(x), this.Y(y), r, 0, 2 * Math.PI);
+        if (ring) { c.fillStyle = '#fff'; c.fill(); c.lineWidth = 2; c.strokeStyle = color; c.stroke(); }
+        else { c.fillStyle = color; c.fill(); c.lineWidth = 1.5; c.strokeStyle = '#fff'; c.stroke(); }
+    }
+    label(str, px, py, { color = COL.slate, align = 'left', base = 'middle', weight = 500, size = 10, bg = true } = {}) {
+        const c = this.ctx; c.font = `${weight} ${size}px Inter, sans-serif`; c.textAlign = align; c.textBaseline = base;
+        if (bg) {
+            const w = c.measureText(str).width;
+            let x0 = align === 'left' ? px : align === 'right' ? px - w : px - w / 2;
+            let y0 = base === 'middle' ? py - size / 2 - 1 : base === 'bottom' ? py - size - 2 : py - 1;
+            c.fillStyle = 'rgba(255,255,255,0.85)'; c.fillRect(x0 - 2, y0, w + 4, size + 3);
+        }
+        c.fillStyle = color; c.fillText(str, px, py);
+    }
+}
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const PRESETS = {
+    planck:  { label: 'Planck 2018 ΛCDM', note: 'Our best fit to the CMB: flat, 31.5% matter, 68.5% dark energy.', H0: 67.4, Om: 0.315, OL: 0.685, w: -1, rad: true, flat: true },
+    eds:     { label: 'Matter only (Einstein–de Sitter)', note: 'The textbook model of the 1980s: flat, no dark energy. Always decelerating.', H0: 67.4, Om: 1, OL: 0, w: -1, rad: true, flat: false },
+    open:    { label: 'Open, no dark energy', note: 'The matter we see, with nothing else. Negatively curved, decelerates forever.', H0: 67.4, Om: 0.3, OL: 0, w: -1, rad: true, flat: false },
+    milne:   { label: 'Empty (Milne)', note: 'Nothing at all: no gravity to brake, nothing to push. a ∝ t exactly.', H0: 67.4, Om: 0, OL: 0, w: -1, rad: false, flat: false },
+    desitter:{ label: 'Only Λ (de Sitter)', note: 'Pure vacuum energy: constant H, exponential growth, no beginning.', H0: 67.4, Om: 0, OL: 1, w: -1, rad: false, flat: false },
+    closed:  { label: 'Closed → Big Crunch', note: 'Too much matter: gravity wins, expansion stops and reverses.', H0: 67.4, Om: 2.5, OL: 0, w: -1, rad: true, flat: false },
+    loiter:  { label: 'Loitering universe', note: 'Gravity and Λ almost exactly balance for a while: the expansion stalls, then resumes.', H0: 67.4, Om: 0.3, OL: 1.7, w: -1, rad: true, flat: false },
+    bounce:  { label: 'Big Bounce (no Big Bang)', note: 'So much Λ that, run backwards, the Universe never shrinks to a point.', H0: 67.4, Om: 0.3, OL: 1.9, w: -1, rad: true, flat: false },
+    phantom: { label: 'Phantom energy → Big Rip', note: 'Dark energy that grows denser as space expands (w < −1). Ends in finite time.', H0: 67.4, Om: 0.315, OL: 0.685, w: -1.5, rad: true, flat: true },
+};
+const state = { ...PRESETS.planck, preset: 'planck', z: 1.6, unit: 'Gpc', zr: '10', st: 'proper', ref: true };
+let M = null;
+const REF = solve(PRESETS.planck);
+
+const U = () => state.unit === 'Gpc' ? 1 : GLY_PER_GPC;   // multiply Gpc → display unit
+
+// ─────────────────────────────────────────────
+// UI SYNC
+// ─────────────────────────────────────────────
+(function initPresets() {
+    const sel = $('preset');
+    Object.entries(PRESETS).forEach(([k, v]) => { const o = document.createElement('option'); o.value = k; o.textContent = v.label; sel.appendChild(o); });
+    const o = document.createElement('option'); o.value = 'custom'; o.textContent = 'Custom'; sel.appendChild(o);
+})();
+
+const Z_TOP = 1100;
+const zToSlider = z => Math.log1p(Math.max(0, z)) / Math.log1p(Z_TOP);
+const sliderToZ = s => Math.expm1(s * Math.log1p(Z_TOP));
+
+function syncUI() {
+    $('preset').value = state.preset;
+    $('preset-note').textContent = state.preset === 'custom' ? 'Your own universe.' : PRESETS[state.preset].note;
+    $('sl-H0').value = state.H0; $('lab-H0').textContent = state.H0.toFixed(1);
+    $('note-H0').textContent = `${tGyr(state.H0).toFixed(1)} Gyr, c/H₀ ≈ ${(dGpc(state.H0) * U()).toFixed(2)} ${state.unit}`;
+    $('sl-Om').value = state.Om; $('lab-Om').textContent = state.Om.toFixed(3);
+    const Or = state.rad ? omegaR(state.H0) : 0;
+    const OL = state.flat ? 1 - state.Om - Or : state.OL;
+    $('sl-OL').value = OL; $('lab-OL').textContent = OL.toFixed(3);
+    $('sl-OL').disabled = state.flat; $('cb-flat').checked = state.flat;
+    $('sl-w').value = state.w; $('lab-w').textContent = state.w.toFixed(2);
+    $('cb-rad').checked = state.rad;
+    $('note-rad').innerHTML = state.rad
+        ? `Ω<sub>r</sub> = ${(Or * 1e5).toFixed(2)}×10<sup>−5</sup>. Tiny today, but dominant for z ≳ ${state.Om > 0 ? Math.round(state.Om / Or - 1).toLocaleString() : '∞'}.`
+        : 'Off: the early Universe is matter dominated all the way back.';
+    const Ok = state.flat ? 0 : 1 - Or - state.Om - OL;
+    $('val-Ok').textContent = (Ok >= 0 ? '+' : '') + Ok.toFixed(3);
+    $('note-Ok').textContent = Math.abs(Ok) < 1e-3 ? 'Flat: Euclidean geometry, parallel lines stay parallel.'
+        : Ok > 0 ? 'Open: negatively curved, like a saddle. Triangles sum to < 180°.'
+        : 'Closed: positively curved, like a sphere. Space is finite.';
+    document.querySelectorAll('#unit-seg button').forEach(b => b.classList.toggle('active', b.dataset.v === state.unit));
+    document.querySelectorAll('#zr-seg button').forEach(b => b.classList.toggle('active', b.dataset.v === state.zr));
+    document.querySelectorAll('#st-seg button').forEach(b => b.classList.toggle('active', b.dataset.v === state.st));
+    $('cb-ref').checked = state.ref;
+    syncZ();
+}
+function syncZ() {
+    $('sl-z').value = zToSlider(state.z);
+    if (document.activeElement !== $('num-z')) $('num-z').value = +state.z.toPrecision(4);
+}
+
+function applyPreset(k) {
+    Object.assign(state, PRESETS[k]); state.preset = k;
+    delete state.label; delete state.note;
+    recompute();
+}
+function setZ(z) {
+    if (!isFinite(z)) return;
+    state.z = Math.max(0, Math.min(z, M ? M.zMax * 0.999 : z));
+    syncZ(); scheduleDraw();
+}
+
+let rafPending = false;
+function scheduleDraw() { if (!rafPending) { rafPending = true; requestAnimationFrame(() => { rafPending = false; drawAll(); }); } }
+function recompute() {
+    if (state.flat) { const Or = state.rad ? omegaR(state.H0) : 0; state.OL = 1 - state.Om - Or; }
+    M = solve(state);
+    if (state.z > M.zMax) state.z = M.zMax * 0.999;
+    syncUI(); scheduleDraw();
+}
+
+// ─────────────────────────────────────────────
+// TIME RANGE SHARED BY ① AND ④
+// ─────────────────────────────────────────────
+function timeRange(m) {
+    let tmin, tmax;
+    if (m.hasBang) {
+        tmin = 0; tmax = 2.5 * m.t0;
+        if (m.fate === 'crunch' && m.tEnd < 8 * m.t0) tmax = m.tEnd;
+        if (m.fate === 'rip') tmax = Math.min(tmax, m.tEnd);
+    } else {
+        tmin = Math.max(m.t[0], -2.5); tmax = 1.5;
+    }
+    tmax = Math.min(tmax, m.t[m.last] + (m.fate === 'crunch' || m.fate === 'rip' ? (m.tEnd - m.t[m.last]) : 0));
+    return [tmin, tmax];
+}
+function stride(n, max = 1600) { return Math.max(1, Math.floor(n / max)); }
+
+// ─────────────────────────────────────────────
+// PANEL ① a(t)
+// ─────────────────────────────────────────────
+const P1 = new Plot('cv-a');
+function drawA() {
+    const m = M, P = P1, tG = m.tG;
+    P.begin();
+    const [tmin, tmax] = timeRange(m);
+    let amax = 1.2;
+    for (let i = 0; i <= m.last; i++) if (m.t[i] >= tmin && m.t[i] <= tmax) amax = Math.max(amax, m.a[i]);
+    amax = Math.min(amax * 1.08, 12);
+    P.range(tmin * tG, tmax * tG, 0, amax);
+    P.axes({ xlabel: m.hasBang ? 'time since the Big Bang  [Gyr]' : 'time relative to today  [Gyr]', ylabel: 'scale factor a', xticks: linTicks(tmin * tG, tmax * tG, 6), yticks: linTicks(0, amax, 5) });
+    P.clip();
+    P.hline(1, { color: COL.box, width: 1, dash: [3, 3] });
+    P.vline(m.t0 * tG, { color: COL.box, width: 1, dash: [3, 3] });
+    if (state.ref && REF) {
+        const s = stride(REF.t.length), xs = [], ys = [];
+        for (let i = 0; i <= REF.last; i += s) { xs.push(REF.t[i] * REF.tG + (m.hasBang ? 0 : -REF.t0 * REF.tG)); ys.push(REF.a[i]); }
+        P.line(xs, ys, { color: COL.ref, width: 1.3, dash: [5, 4] });
+    }
+    // coloured by sign of acceleration
+    const s = stride(m.t.length, 3000);
+    let seg = { xs: [], ys: [], accel: null };
+    const flush = () => { if (seg.xs.length > 1) P.line(seg.xs, seg.ys, { color: seg.accel ? COL.purple : COL.blue, width: 2.2 }); };
+    for (let i = 0; i <= m.last; i += s) {
+        const acc = m.acc(m.a[i]) > 0;
+        if (seg.accel !== null && acc !== seg.accel) { seg.xs.push(m.t[i] * tG); seg.ys.push(m.a[i]); flush(); seg = { xs: [], ys: [], accel: acc }; }
+        if (seg.accel === null) seg.accel = acc;
+        seg.xs.push(m.t[i] * tG); seg.ys.push(m.a[i]);
+    }
+    flush();
+    // end-point extension to crunch / rip
+    if (m.fate === 'crunch') P.line([m.t[m.last] * tG, m.tEnd * tG], [m.a[m.last], 0], { color: COL.blue, width: 2.2 });
+    P.unclip();
+
+    // events
+    P.dot(m.t0 * tG, 1, { color: COL.ink, r: 3 });
+    P.label('today', P.X(m.t0 * tG) + 6, P.Y(1) + 9, { color: COL.ink, weight: 600 });
+    if (m.zAcc !== null) {
+        const r = m.interpA(1 / (1 + m.zAcc));
+        if (r) { P.dot(r.t * tG, 1 / (1 + m.zAcc), { color: COL.purple, r: 3.5 }); P.label(`acceleration begins (z = ${m.zAcc.toFixed(2)})`, P.X(r.t * tG) + 6, P.Y(1 / (1 + m.zAcc)) - 9, { color: COL.purple }); }
+    }
+    if (m.turn && m.turn.t * tG < P.x1) { P.dot(m.turn.t * tG, m.turn.a, { color: COL.rose }); P.label('turnaround', P.X(m.turn.t * tG), P.Y(m.turn.a) - 10, { color: COL.rose, align: 'center' }); }
+    if (m.fate === 'crunch' && m.tEnd * tG <= P.x1 * 1.0001) P.label('Big Crunch', P.X(m.tEnd * tG) - 4, P.Y(0) - 10, { color: COL.rose, align: 'right', weight: 600 });
+    if (m.fate === 'rip' && m.tEnd * tG <= P.x1 * 1.0001) P.label('Big Rip →', P.bx + P.bw - 4, P.by + 10, { color: COL.rose, align: 'right', weight: 600 });
+    if (m.bounce) { P.dot(m.bounce.t * tG, m.bounce.a, { color: COL.rose }); P.label('bounce: smallest size', P.X(m.bounce.t * tG) + 6, P.Y(m.bounce.a) + 10, { color: COL.rose }); }
+    if (m.hasBang) P.label('Big Bang', P.bx + 4, P.by + P.bh - 8, { color: COL.slate, weight: 600 });
+    // selection
+    const d = m.dist(state.z);
+    if (d) { P.dot(d.t * tG, d.a, { color: COL.ink, r: 4.5, ring: true }); }
+}
+
+// ─────────────────────────────────────────────
+// PANEL ② Ω_i(a)
+// ─────────────────────────────────────────────
+const P2 = new Plot('cv-om');
+function drawOm() {
+    const m = M, P = P2;
+    P.begin({ t: 26 });
+    const la0 = -5, la1 = 1.3;
+    const N = 500, xs = [], R = [], Ma = [], D = [], K = [];
+    let ymin = -0.1, ymax = 1.05;
+    const aLo = m.bounce ? m.bounce.a : 0;
+    const aHi = m.fate === 'crunch' && m.turn ? m.turn.a : Infinity;
+    const deExp = -3 * (1 + m.w);
+    for (let k = 0; k <= N; k++) {
+        const a = Math.pow(10, la0 + (la1 - la0) * k / N);
+        xs.push(a);
+        const e2 = m.E2(a);
+        if (a < aLo * 0.999 || a > aHi * 1.001 || e2 <= 0) { R.push(NaN); Ma.push(NaN); D.push(NaN); K.push(NaN); continue; }
+        const r = m.Or / a ** 4 / e2, mm = m.Om / a ** 3 / e2, de = m.OL * Math.pow(a, deExp) / e2, kk = m.Ok / a ** 2 / e2;
+        R.push(r); Ma.push(mm); D.push(de); K.push(kk);
+        ymin = Math.min(ymin, r, mm, de, kk); ymax = Math.max(ymax, r, mm, de, kk);
+    }
+    ymin = Math.max(ymin * 1.05, -2); ymax = Math.min(ymax * 1.05, 3);
+    P.range(Math.pow(10, la0), Math.pow(10, la1), ymin, ymax, true, false);
+    P.axes({ xlabel: 'scale factor a  (log)', ylabel: 'fraction of expansion budget', xticks: logTicks(P.x0, P.x1), yticks: linTicks(ymin, ymax, 5) });
+    // top z ticks
+    const c = P.ctx; c.font = '10px Inter, sans-serif'; c.fillStyle = COL.ref; c.textAlign = 'center'; c.textBaseline = 'bottom';
+    [10000, 1000, 100, 10, 1].forEach(z => { const x = P.X(1 / (1 + z)); c.fillText(`z=${z >= 1000 ? z / 1000 + 'k' : z}`, x, P.by - 3); c.fillRect(x - 0.5, P.by, 1, 4); });
+    P.clip();
+    // shade unphysical
+    c.fillStyle = 'rgba(148,163,184,0.15)';
+    if (aLo > 0) c.fillRect(P.bx, P.by, P.X(aLo) - P.bx, P.bh);
+    if (isFinite(aHi)) c.fillRect(P.X(aHi), P.by, P.bx + P.bw - P.X(aHi), P.bh);
+    P.hline(0, { color: COL.box, width: 1 });
+    P.vline(1, { color: COL.box, width: 1, dash: [3, 3] });
+    if (m.Or > 0) P.line(xs, R, { color: COL.amber, width: 2 });
+    P.line(xs, Ma, { color: COL.blue, width: 2 });
+    if (m.OL !== 0) P.line(xs, D, { color: COL.purple, width: 2 });
+    if (Math.abs(m.Ok) > 1e-6) P.line(xs, K, { color: COL.slate, width: 1.6 });
+    const d = m.dist(state.z);
+    if (d && d.a > P.x0) P.vline(d.a, { color: COL.ink, width: 1.3 });
+    P.unclip();
+    P.label('today', P.X(1) + 4, P.by + 10, { color: COL.ink, weight: 600 });
+    if (aLo > 0) P.label('never this small', P.bx + 4, P.by + P.bh - 10, { color: COL.slate });
+    if (isFinite(aHi)) P.label('never this big', P.bx + P.bw - 4, P.by + P.bh - 10, { color: COL.slate, align: 'right' });
+}
+
+// ─────────────────────────────────────────────
+// PANEL ③ distances
+// ─────────────────────────────────────────────
+const P3 = new Plot('cv-d');
+function drawDist() {
+    const m = M, P = P3, k = m.dG * U();
+    P.begin();
+    const log = state.zr === 'log';
+    const z0 = log ? 0.01 : 0, z1 = log ? Z_TOP : +state.zr;
+    const N = 500, Z = [], DC = [], DL = [], DA = [], DT = [];
+    for (let i = 0; i <= N; i++) {
+        const z = log ? Math.pow(10, Math.log10(z0) + (Math.log10(z1) - Math.log10(z0)) * i / N) : z0 + (z1 - z0) * i / N;
+        const d = m.dist(z);
+        Z.push(z);
+        if (!d) { DC.push(NaN); DL.push(NaN); DA.push(NaN); DT.push(NaN); continue; }
+        DC.push(d.chi * k); DL.push(d.DL * k); DA.push(d.DA * k); DT.push(d.Dlt * k);
+    }
+    let ymax = 0;
+    [DC, DA, DT].forEach(arr => arr.forEach(v => { if (isFinite(v)) ymax = Math.max(ymax, v); }));
+    if (state.ref) { const r = REF.dist(z1); if (r) ymax = Math.max(ymax, r.chi * REF.dG * U()); }
+    ymax = (ymax || 1) * 1.15;
+    P.range(z0, z1, 0, ymax, log, false);
+    P.axes({ xlabel: log ? 'redshift z  (log)' : 'redshift z', ylabel: `distance  [${state.unit}]`, xticks: log ? logTicks(z0, z1) : linTicks(z0, z1, 6), yticks: linTicks(0, ymax, 5) });
+    P.clip();
+    // Hubble law
+    P.line(Z, Z.map(z => z * k), { color: COL.ref, width: 1.3, dash: [2, 3] });
+    if (state.ref) {
+        const rk = REF.dG * U();
+        P.line(Z, Z.map(z => { const r = REF.dist(z); return r ? r.chi * rk : NaN; }), { color: COL.ref, width: 1.2, dash: [5, 4] });
+        P.line(Z, Z.map(z => { const r = REF.dist(z); return r ? r.DA * rk : NaN; }), { color: COL.ref, width: 1.2, dash: [5, 4] });
+    }
+    P.line(Z, DT, { color: COL.amber, width: 2 });
+    P.line(Z, DL, { color: COL.rose, width: 2 });
+    P.line(Z, DC, { color: COL.blue, width: 2 });
+    P.line(Z, DA, { color: COL.green, width: 2 });
+    if (m.daMax && m.daMax.z >= z0 && m.daMax.z <= z1) {
+        P.dot(m.daMax.z, m.daMax.d * k, { color: COL.green, r: 3.5 });
+    }
+    const d = m.dist(state.z);
+    if (d && state.z >= z0 && state.z <= z1) {
+        P.vline(state.z, { color: COL.ink, width: 1.2 });
+        [[d.Dlt, COL.amber], [d.DL, COL.rose], [d.chi, COL.blue], [d.DA, COL.green]].forEach(([v, col]) => { if (v * k <= ymax) P.dot(state.z, v * k, { color: col, r: 3.5, ring: true }); });
+    }
+    P.unclip();
+    if (m.daMax && m.daMax.z >= z0 && m.daMax.z <= z1) {
+        P.label(`D_A peaks at z = ${m.daMax.z.toFixed(2)}`, P.X(m.daMax.z) + 6, P.Y(m.daMax.d * k) + 11, { color: COL.green, weight: 600 });
+    }
+    // where D_L leaves
+    for (let i = 0; i < DL.length; i++) if (DL[i] > ymax) { P.label('D_L ↑', P.X(Z[i]) - 2, P.by + 9, { color: COL.rose, align: 'right', weight: 600 }); break; }
+    if (m.zMax < z1 && m.zMax > z0) P.label(`no light from beyond z = ${m.zMax.toFixed(2)}`, P.X(m.zMax) - 4, P.by + P.bh - 10, { color: COL.slate, align: 'right' });
+}
+
+// ─────────────────────────────────────────────
+// PANEL ④ spacetime diagram
+// ─────────────────────────────────────────────
+const P4 = new Plot('cv-st');
+function drawST() {
+    const m = M, P = P4, tG = m.tG, k = m.dG * U(), proper = state.st === 'proper';
+    P.begin();
+    const [tmin, tmax] = timeRange(m);
+    // horizontal extent (c/H0 units)
+    let lcMaxChi = 0;
+    for (let i = 0; i <= m.iT; i++) lcMaxChi = Math.max(lcMaxChi, m.eta0 - m.eta[i]);
+    let X = isFinite(m.PH0) ? m.PH0 : 1.5 * Math.max(lcMaxChi, 1);
+    if (!proper && m.hasEH) X = Math.max(X, Math.min(m.etaEnd - (m.finitePH ? 0 : m.eta[0]), 3 * X) * 0.5);
+    X = Math.max(X, 0.5) * 1.15;
+    P.range(-X * k, X * k, tmin * tG, tmax * tG);
+    P.axes({ xlabel: `${proper ? 'proper' : 'comoving'} distance from us  [${state.unit}]`, ylabel: m.hasBang ? 'time since Big Bang  [Gyr]' : 'time from today  [Gyr]', xticks: linTicks(-X * k, X * k, 6), yticks: linTicks(tmin * tG, tmax * tG, 5) });
+    P.clip();
+    const s = stride(m.t.length, 1500);
+    const idx = []; for (let i = 0; i <= m.last; i += s) if (m.t[i] >= tmin - 0.05 && m.t[i] <= tmax + 0.05) idx.push(i);
+    if (idx[idx.length - 1] !== m.last && m.t[m.last] <= tmax + 0.05) idx.push(m.last);
+    const conv = (chi, i) => (proper ? m.a[i] * chi : chi) * k;
+    const T = idx.map(i => m.t[i] * tG);
+    // galaxy worldlines
+    const step = niceStep(X, 5);
+    for (let c = step; c < X * 6; c += step) {
+        const xs = idx.map(i => conv(c, i));
+        if (Math.min(...xs.map(Math.abs)) > X * k * 1.2) continue;
+        P.line(xs, T, { color: '#e2e8f0', width: 1 });
+        P.line(xs.map(v => -v), T, { color: '#e2e8f0', width: 1 });
+    }
+    P.line([0, 0], [P.y0, P.y1], { color: '#cbd5e1', width: 1.2 });
+    // past light cone (filled)
+    const lcI = idx.filter(i => i <= m.iT);
+    if (m.iT !== lcI[lcI.length - 1]) lcI.push(m.iT);
+    if (lcI.length > 1) {
+        const c = P.ctx; c.beginPath();
+        lcI.forEach((i, j) => { const px = P.X(conv(m.eta0 - m.eta[i], i)), py = P.Y(m.t[i] * tG); j ? c.lineTo(px, py) : c.moveTo(px, py); });
+        for (let j = lcI.length - 1; j >= 0; j--) { const i = lcI[j]; c.lineTo(P.X(-conv(m.eta0 - m.eta[i], i)), P.Y(m.t[i] * tG)); }
+        c.closePath(); c.fillStyle = 'rgba(252,211,77,0.28)'; c.fill();
+        const xs = lcI.map(i => conv(m.eta0 - m.eta[i], i)), ts = lcI.map(i => m.t[i] * tG);
+        P.line(xs, ts, { color: COL.amber, width: 1.8 }); P.line(xs.map(v => -v), ts, { color: COL.amber, width: 1.8 });
+    }
+    // Hubble sphere
+    {
+        const xs = idx.map(i => { const v = (proper ? m.a[i] : 1) / Math.abs(m.ad[i]); return v > X * 20 ? NaN : v * k; });
+        P.line(xs, T, { color: COL.blue, width: 1.6, dash: [5, 4] }); P.line(xs.map(v => -v), T, { color: COL.blue, width: 1.6, dash: [5, 4] });
+    }
+    // particle horizon
+    if (m.finitePH) {
+        const xs = idx.map(i => conv(m.eta[i], i));
+        P.line(xs, T, { color: COL.green, width: 1.8 }); P.line(xs.map(v => -v), T, { color: COL.green, width: 1.8 });
+    }
+    // event horizon
+    if (m.hasEH) {
+        const xs = idx.map(i => conv(m.etaEnd - m.eta[i], i));
+        P.line(xs, T, { color: COL.purple, width: 1.8 }); P.line(xs.map(v => -v), T, { color: COL.purple, width: 1.8 });
+    }
+    // now
+    P.hline(m.t0 * tG, { color: COL.ink, width: 1, dash: [3, 3] });
+    // selected source
+    const d = m.dist(state.z);
+    if (d) {
+        const xEmit = (proper ? d.Dthen : d.chi) * k, xNow = d.chi * k;
+        // the source galaxy's worldline
+        const xs = idx.map(i => (proper ? m.a[i] * d.chi : d.chi) * k);
+        P.line(xs, T, { color: COL.rose, width: 1.4, alpha: 0.8 });
+        P.dot(xEmit, d.t * tG, { color: COL.rose, r: 4.5, ring: true });
+        P.dot(xNow, m.t0 * tG, { color: COL.rose, r: 3.5 });
+    }
+    P.unclip();
+    P.dot(0, m.t0 * tG, { color: COL.ink, r: 3.5 });
+    P.label('now', P.bx + 4, P.Y(m.t0 * tG) - 8, { color: COL.ink, weight: 600 });
+    if (d) P.label('emitted', P.X((proper ? d.Dthen : d.chi) * k) + 7, P.Y(d.t * tG), { color: COL.rose, weight: 600 });
+}
+
+// ─────────────────────────────────────────────
+// CHIPS, READOUT, INSIGHTS
+// ─────────────────────────────────────────────
+function fmtD(x) { return `${fmt(x * M.dG * U())} ${state.unit}`; }
+function fmtT(x) { return `${fmt(x * M.tG)} Gyr`; }
+
+function drawChips() {
+    const m = M;
+    const fate = { crunch: `Big Crunch in ${fmt((m.tEnd - m.t0) * m.tG)} Gyr`, rip: `Big Rip in ${fmt((m.tEnd - m.t0) * m.tG)} Gyr`, accel: 'Expands forever, accelerating', coast: 'Expands forever, slowing', collapsing: 'Recollapsing' }[m.fate];
+    const chips = [
+        ['Age', m.hasBang ? fmtT(m.t0) : (m.bounce ? `${fmt(-m.bounce.t * m.tG)} Gyr since bounce` : 'No beginning')],
+        ['Fate', fate],
+        ['Deceleration q₀', `${m.q0.toFixed(3)} ${m.q0 < 0 ? '(speeding up)' : '(slowing)'}`],
+        ['Hubble radius c/H₀', fmtD(1)],
+        ['Observable universe', isFinite(m.PH0) ? `radius ${fmtD(m.PH0)}` : 'unbounded'],
+        ['Event horizon (today)', m.hasEH ? fmtD(m.EH0) : 'none'],
+    ];
+    $('chips').innerHTML = chips.map(([k, v]) => `<div class="chip flex flex-col gap-0.5"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+}
+
+function drawReadout() {
+    const m = M, d = m.dist(state.z);
+    $('rd-title').textContent = `z = ${fmt(state.z, 4)}`;
+    if (!d) { $('readout').innerHTML = '<p class="font-serif text-sm text-slate-500 col-span-4">This universe was never that small, so there is no such redshift.</p>'; $('rd-sub').textContent = ''; return; }
+    $('rd-sub').textContent = `Light left when the Universe was ${fmt(d.a * 100, 3)}% of its present size.`;
+    const H = d.H * state.H0;
+    const kpcPerArcsec = d.DA * m.dG * 1e6 * Math.PI / 648000;
+    const DLmpc = d.DL * m.dG * 1000;
+    const mu = DLmpc > 0 ? 5 * Math.log10(DLmpc) + 25 : NaN;
+    const rows = [
+        ['Age at emission', m.hasBang ? fmtT(d.t) : '—', m.hasBang ? `${fmt(d.t / m.t0 * 100, 3)}% of today's age` : 'no Big Bang to count from'],
+        ['Lookback time', fmtT(m.t0 - d.t), 'how long the light was in flight'],
+        ['Expansion rate H(z)', `${fmt(H, 4)} km/s/Mpc`, `${fmt(d.H, 3)} × today's`],
+        ['Scale factor a', fmt(d.a, 4), '1/(1+z)'],
+        ['Comoving distance', fmtD(d.chi), 'where it is now (proper distance today)'],
+        ['Distance at emission', fmtD(d.Dthen), 'how far it was when the light left'],
+        ['Light-travel distance', fmtD(d.Dlt), 'c × lookback time; not a real separation'],
+        ['Luminosity distance D_L', fmtD(d.DL), isFinite(mu) ? `distance modulus μ = ${mu.toFixed(2)} mag` : ''],
+        ['Angular diameter dist. D_A', fmtD(d.DA), `${fmt(kpcPerArcsec, 3)} kpc per arcsec`],
+        ['A 30 kpc galaxy spans', kpcPerArcsec > 0 ? `${fmt(30 / kpcPerArcsec, 3)}″` : '—', 'roughly the Milky Way disc'],
+        ['Recession speed now', `${fmt(d.vNow, 3)} c`, d.vNow > 1 ? 'faster than light, and we still see it' : 'H₀ × proper distance today'],
+        ['Recession speed then', `${fmt(d.vThen, 3)} c`, d.vThen > 1 ? 'superluminal when the light left' : 'at the moment of emission'],
+    ];
+    $('readout').innerHTML = rows.map(([k, v, s]) => `<div class="rd flex flex-col gap-0.5"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join('');
+}
+
+function drawInsights() {
+    const m = M, out = [];
+    if (m.hasBang && m.finitePH) {
+        out.push(`The Universe is <strong>${fmtT(m.t0)}</strong> old, yet the edge of the observable universe is <strong>${fmtD(m.PH0)}</strong> away, not ${fmtD(m.t0)} (c × age). Space kept stretching behind the light while it travelled.`);
+    } else if (m.hasBang) {
+        out.push(`There was a Big Bang ${fmtT(m.t0)} ago, but early on the Universe grew so fast that light from <em>every</em> comoving distance has reached us: the particle horizon is infinite.`);
+    } else if (m.bounce) {
+        out.push(`Run backwards, this universe shrinks to ${fmt(m.bounce.a * 100, 3)}% of its present size and then grows again: <strong>no Big Bang</strong>. Nothing could have a redshift above z = ${m.zMax.toFixed(2)}. We observe quasars at z > 7 and the CMB at z ≈ 1090, which rules this out.`);
+    } else {
+        out.push(`This universe has <strong>no beginning</strong>: run backwards, it shrinks forever but never reaches zero size in finite time.`);
+    }
+    if (m.zAcc !== null) {
+        const r = m.interpA(1 / (1 + m.zAcc));
+        out.push(`The expansion switched from braking to <strong>accelerating</strong> at z = ${m.zAcc.toFixed(2)}, ${r ? fmtT(m.t0 - r.t) : ''} ago.${m.zDE !== null && m.zDE > 0 ? ` Dark energy only overtook matter later, at z = ${m.zDE.toFixed(2)}, because anything with w < −1/3 pushes even while it is the minority.` : ''}`);
+    } else if (m.q0 > 0) {
+        out.push(`Gravity is winning: the expansion is <strong>slowing down</strong> today (q₀ = ${m.q0.toFixed(2)}).`);
+    }
+    if (m.daMax) {
+        out.push(`Beyond z ≈ <strong>${m.daMax.z.toFixed(2)}</strong>, more distant objects look <em>bigger</em> on the sky. Their light left when the Universe was small and they were close to us. At most they were ${fmtD(m.daMax.d)} away, the widest point of the light-cone teardrop in panel ④.`);
+    } else if (m.zMax > 50) {
+        out.push(`Here the angular diameter distance never turns over: the farther, the smaller, all the way back. Compare with the Planck universe.`);
+    }
+    if (m.zHS !== null) {
+        out.push(`Galaxies beyond z ≈ <strong>${m.zHS.toFixed(2)}</strong> are receding faster than light <em>today</em>, yet we see them. Recession is space growing, not motion through space, and nothing breaks the speed limit locally.`);
+    }
+    if (m.hasEH) {
+        out.push(`Light emitted <em>today</em> by anything more than <strong>${fmtD(m.EH0)}</strong> away will never reach us${m.fate === 'crunch' ? ' before the crunch' : ''}. That is the cosmic event horizon. ${m.finitePH && m.PH0 > 0 ? `About ${Math.round(100 * (1 - Math.pow(Math.min(m.EH0 / m.PH0, 1), 3)))}% of the galaxies we can see are already beyond it.` : ''}`);
+    } else if (m.fate === 'coast') {
+        out.push(`With no acceleration there is no event horizon: wait long enough and light from any galaxy will reach us.`);
+    }
+    $('insights-panel').innerHTML = out.map(s => `<p>${s}</p>`).join('');
+}
+
+function drawAll() {
+    if (!M) return;
+    drawA(); drawOm(); drawDist(); drawST();
+    drawChips(); drawReadout(); drawInsights();
+}
+
+// ─────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────
+function custom() { state.preset = 'custom'; }
+$('preset').addEventListener('change', e => { if (e.target.value !== 'custom') applyPreset(e.target.value); });
+$('sl-H0').addEventListener('input', e => { state.H0 = +e.target.value; custom(); recompute(); });
+$('sl-Om').addEventListener('input', e => { state.Om = +e.target.value; custom(); recompute(); });
+$('sl-OL').addEventListener('input', e => { state.OL = +e.target.value; custom(); recompute(); });
+$('sl-w').addEventListener('input', e => { state.w = +e.target.value; custom(); recompute(); });
+$('cb-flat').addEventListener('change', e => { state.flat = e.target.checked; custom(); recompute(); });
+$('cb-rad').addEventListener('change', e => { state.rad = e.target.checked; custom(); recompute(); });
+$('cb-ref').addEventListener('change', e => { state.ref = e.target.checked; scheduleDraw(); });
+$('sl-z').addEventListener('input', e => setZ(sliderToZ(+e.target.value)));
+$('num-z').addEventListener('change', e => setZ(+e.target.value));
+document.querySelectorAll('[data-z]').forEach(b => b.addEventListener('click', () => setZ(+b.dataset.z)));
+function segHandler(id, key) {
+    document.querySelectorAll(`#${id} button`).forEach(b => b.addEventListener('click', () => { state[key] = b.dataset.v; syncUI(); scheduleDraw(); }));
+}
+segHandler('unit-seg', 'unit'); segHandler('zr-seg', 'zr'); segHandler('st-seg', 'st');
+
+function canvasPos(e, cv) { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+function pickByTime(P, e, tAxisIsY) {
+    const [px, py] = canvasPos(e, P.cv);
+    if (!P.inside(px, py)) return;
+    const t = (tAxisIsY ? P.invY(py) : P.invX(px)) / M.tG;
+    const a = M.aAtT(Math.min(t, M.t0));
+    if (a) setZ(1 / a - 1);
+}
+P1.cv.addEventListener('click', e => pickByTime(P1, e, false));
+P4.cv.addEventListener('click', e => pickByTime(P4, e, true));
+P2.cv.addEventListener('click', e => { const [px, py] = canvasPos(e, P2.cv); if (!P2.inside(px, py)) return; const a = P2.invX(px); if (a <= 1) setZ(1 / a - 1); });
+P3.cv.addEventListener('click', e => { const [px, py] = canvasPos(e, P3.cv); if (!P3.inside(px, py)) return; setZ(P3.invX(px)); });
+window.addEventListener('resize', scheduleDraw);
+
+// ─────────────────────────────────────────────
+// GUIDED EXPERIMENTS
+// ─────────────────────────────────────────────
+const go = (preset, extra = {}) => () => { applyPreset(preset); Object.assign(state, extra); syncUI(); if ('z' in extra) setZ(extra.z); scheduleDraw(); };
+const EXPERIMENTS = [
+    { title: 'Why 46 billion light-years?', text: 'The Universe is 13.8 Gyr old, but the most distant light we see, the CMB, comes from matter that is now ~46 Gly away. In panel ④, follow the red galaxy from the moment it emitted (open circle) to where it is now (filled dot). Then switch to comoving coordinates: the light cone becomes a straight-ish line and the galaxy stops moving.',
+      actions: [['Planck, CMB (z = 1090)', go('planck', { z: 1090, unit: 'Gly', st: 'proper' })], ['Same, comoving view', go('planck', { z: 1090, unit: 'Gly', st: 'comoving' })]] },
+    { title: 'The farther, the bigger', text: 'Past z ≈ 1.6, a galaxy of fixed size looks <em>larger</em> on the sky the farther away it is. Its light left when the Universe was so small that the galaxy was close to us. Compare with the empty universe, where D<sub>A</sub> never turns over.',
+      actions: [['Planck, z = 1.6', go('planck', { z: 1.6, zr: '10' })], ['Empty universe', go('milne', { z: 1.6, zr: '10' })]] },
+    { title: 'The age problem', text: 'Without dark energy, the same H₀ gives a Universe only ~9.7 Gyr old, younger than the oldest stars we see (~12–13 Gyr). That tension was one hint of dark energy before supernovae confirmed it in 1998. Note too that the curve is blue everywhere: no acceleration.',
+      actions: [['Matter only', go('eds', { z: 1 })], ['Back to Planck', go('planck', { z: 1 })]] },
+    { title: 'Faster than light, yet visible', text: 'Pick a galaxy at z = 3. The readout shows it is receding at more than c both now and when it emitted. Its light still reaches us: in panel ④ the Hubble sphere (dashed) grows and overtakes the photons, which then make headway.',
+      actions: [['Planck, z = 3', go('planck', { z: 3, st: 'proper' })]] },
+    { title: 'Geometry used to be destiny', text: 'With matter alone, a closed universe recollapses and an open one expands forever. Add dark energy and that link breaks: the same closed universe now expands forever.',
+      actions: [['Closed → Big Crunch', go('closed', { z: 1 })], ['Same + Ω_Λ = 1', () => { applyPreset('closed'); state.OL = 1; state.preset = 'custom'; recompute(); }]] },
+    { title: 'A universe with no Big Bang', text: 'Pile on enough Λ and, run backwards, the Universe bounces at a finite size. A bounce at z ≈ 1 is ruled out because we see the CMB at z ≈ 1090. Nearly as much Λ gives a "loitering" universe that hovers at one size for billions of years.',
+      actions: [['Big Bounce', go('bounce', { z: 0.5 })], ['Loitering', go('loiter', { z: 1 })], ['de Sitter', go('desitter', { z: 1 })]] },
+    { title: 'Phantom energy and the Big Rip', text: 'If w < −1, dark energy gets <em>denser</em> as space expands. H grows without limit and a reaches infinity in finite time, tearing apart galaxies, stars and atoms. Drag w back toward −1 and watch the rip recede into the future.',
+      actions: [['w = −1.5', go('phantom', { z: 1 })], ['w = −1.1', () => { applyPreset('phantom'); state.w = -1.1; state.preset = 'custom'; recompute(); }]] },
+    { title: 'Who ruled when?', text: 'In panel ② radiation dominates until z ≈ 3400, matter until z ≈ 0.3, and dark energy after that. Each component dilutes at its own rate as space grows. Turn radiation off and the earliest epoch disappears, but almost nothing visible today changes.',
+      actions: [['Planck', go('planck', { z: 3400, zr: 'log' })]] },
+];
+(function renderExperiments() {
+    const host = $('experiments');
+    EXPERIMENTS.forEach((ex, i) => {
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-slate-200 rounded-md p-3.5 flex flex-col gap-2';
+        card.innerHTML = `<div class="font-sans text-sm font-semibold text-slate-900">${String(i + 1).padStart(2, '0')}. ${ex.title}</div>
+            <p class="font-serif text-xs text-slate-600 leading-snug">${ex.text}</p>
+            <div class="flex flex-wrap gap-1.5 mt-auto"></div>`;
+        const row = card.lastElementChild;
+        ex.actions.forEach(([label, fn]) => {
+            const b = document.createElement('button');
+            b.className = 'try-btn';
+            b.textContent = label;
+            b.addEventListener('click', () => { fn(); window.scrollTo({ top: $('panels').offsetTop - 80, behavior: 'smooth' }); });
+            row.appendChild(b);
+        });
+        host.appendChild(card);
+    });
+})();
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+recompute();
+</script>
+</body>
+</html>
